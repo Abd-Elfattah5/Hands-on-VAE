@@ -51,3 +51,6 @@ runs/
 .DS_Store
 Thumbs.db
 token.txt
+
+# Local / Untracked Documentation
+ARCHITECTURE_DEEP_DIVE.md
