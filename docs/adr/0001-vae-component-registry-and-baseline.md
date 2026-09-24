@@ -1,0 +1,3 @@
+# 0001. VAE Component Registry & Baseline Architecture
+
+To support systematic experimentation across all 7 generative model categories (encoder backbones, posterior formulations, latent priors, decoder backbones, likelihood distributions, loss stabilizers, and training controls) without modifying core training logic, we adopt an abstract-base-class registry pattern with decorator dispatchers. For the initial CIFAR-10 baseline, we standardize on a 3-stage CNN ($[32, 64, 128]$ channels) with GroupNorm (8 groups) and LeakyReLU (0.2), paired with a diagonal Gaussian posterior ($d=32$), standard isotropic Gaussian prior, transposed convolution decoder, and homoscedastic Gaussian likelihood on $[-1, 1]$ normalized images with fixed $\sigma^2=1.0$ (MSE-equivalent ELBO).
