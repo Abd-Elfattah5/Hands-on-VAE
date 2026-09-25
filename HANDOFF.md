@@ -165,10 +165,12 @@ Phase 6: Polish & Cross-Cutting Concerns
 ├── artifacts/
 │   ├── eval/                        # CIFAR-10 baseline plots
 │   ├── eval_mnist/                  # MNIST baseline plots
-│   ├── eval_enhanced/               # (To be generated: Enhanced CIFAR-10 plots)
+│   ├── eval_enhanced/               # Enhanced CIFAR-10 plots
 │   ├── interpolations/              # Synthetic 2D grids and strips
 │   ├── samples/                     # 1024x1024 prior sample grids
 │   └── runs/                        # Checkpoints (.pt) and training trajectories
+├── vae_colab_diagnostic.ipynb       # (Untracked / gitignored) Self-contained Colab notebook:
+│                                    # Enlarged Conv (8.8M params), d=512, Full Covariance
 └── README.md                        # Project overview and reproduction guide
 ```
 
