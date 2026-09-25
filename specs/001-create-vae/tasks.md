@@ -202,3 +202,42 @@ Phase 3: User Story 1 (T010-T024)   Phase 4: User Story 2 (T025-T027)
 - [X] T056 Implement unit tests for checkpoint save, restore, and schema portability in `tests/unit/test_checkpoint.py` per FR-007, SC-005 (missing)
 - [X] T057 Execute full automated unit test suite `pytest tests/ -v` and verify 100% pass rate per Constitution IV, SC-002 (missing)
 - [X] T058 Execute quickstart validation scenarios from `specs/001-create-vae/quickstart.md` per plan: quickstart validation (missing)
+
+---
+
+## Phase 8: Benchmarking, Latent Diagnostics & Deliverables (GenCV003)
+
+**Purpose**: Fulfill 100% of the VAE requirements from `GenCV003.pdf`, including high-resolution visual rendering, pure synthetic latent space diagnostics, quantitative FID/IS benchmarking, formal technical report Deliverable (a), and reproduction guide Deliverable (b).
+
+### High-Resolution Rendering & Pure Synthetic Latent Diagnostics
+
+- [X] T059 [P] Implement high-resolution Lanczos/bicubic canvas upscaling (`--upscale` parameter, $4\times \to 128 \times 128$ per tile, yielding $1024 \times 1024$ grids) in `src/evaluation/visualizer.py`
+- [X] T060 [P] Implement side-by-side original vs. reconstructed image comparison gallery utility with PSNR/MSE metrics in `src/evaluation/visualizer.py`
+- [X] T061 [P] Implement pure synthetic 2D bilinear interpolation from prior $\mathcal{N}(0, I)$ without real image encoding in `src/evaluation/visualizer.py`
+- [X] T062 [P] Implement 1D latent coordinate traversal (sweeping active axes $z_j \in [-3.0, +3.0]$ with all other dimensions clamped to $0$) in `src/evaluation/visualizer.py`
+
+### Latent Space Dimensionality Reduction & Manifold Analysis
+
+- [X] T063 [P] Implement t-SNE and PCA dimensionality reduction projecting 32D posterior means $\mu(x)$ to 2D with CIFAR-10 class labels and prior overlay in `src/evaluation/latent_analysis.py`
+- [X] T064 [P] Implement 2D latent manifold meshgrid traversal across top 2 active latent dimensions $[-2.5, +2.5] \times [-2.5, +2.5]$ in `src/evaluation/latent_analysis.py`
+
+### Quantitative Benchmarking Pipeline (FID & Inception Score)
+
+- [X] T065 [P] Implement Inception Score (IS) computation over synthetic VAE samples in `src/evaluation/metrics.py`
+- [X] T066 [P] Implement Fréchet Inception Distance (FID) computation between real CIFAR-10 test partition and synthetic VAE samples in `src/evaluation/metrics.py`
+
+### CLI Integration
+
+- [X] T067 Implement `vae benchmark` CLI command computing FID, IS, ELBO, and active units saving to `artifacts/eval/benchmark_metrics.json` in `src/cli/main.py`
+- [X] T068 Implement `vae plot-latent` CLI command generating t-SNE, PCA, and 2D manifold traversals to `artifacts/eval/` in `src/cli/main.py`
+- [X] T069 Update `vae interpolate` and `vae generate` CLI commands with `--upscale` and `--synthetic` flags in `src/cli/main.py`
+
+### Unit Tests
+
+- [X] T070 [P] Implement unit tests for Inception Score and FID computation pipelines in `tests/unit/test_metrics.py`
+- [X] T071 [P] Implement unit tests for t-SNE/PCA projections and coordinate sweep utilities in `tests/unit/test_latent_analysis.py`
+
+### Documentation & Deliverables (GenCV003)
+
+- [X] T072 Author comprehensive Baseline VAE Technical Report documenting mathematical derivations, 50-epoch loss curves, quantitative metrics (FID, IS, ELBO), qualitative high-res plates, and failure mode analysis in `docs/reports/001-baseline-vae-report.md` per Deliverable (a)
+- [X] T073 Update root `README.md` with project overview, mathematical foundation, installation instructions, and CLI reproduction guide in `README.md` per Deliverable (b)
