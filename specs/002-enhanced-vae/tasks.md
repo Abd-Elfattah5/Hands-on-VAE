@@ -27,9 +27,9 @@
 
 **Purpose**: Adapt base likelihood and composite VAE contracts to support dual-head decoder outputs and auxiliary uncertainty maps.
 
-- [ ] T003 [P] Update `BaseLikelihood.negative_log_likelihood` contract in `src/models/base.py` to accept optional `extra: Optional[dict[str, Any]] = None`
-- [ ] T004 [P] Update `ELBOLoss.forward` in `src/models/losses/elbo.py` to pass `output.extra` into `self.likelihood.negative_log_likelihood`
-- [ ] T005 Update composite `VAE` module in `src/models/vae.py` to intercept dual decoder output `(reconstruction, log_var_map)` and populate `output.extra["log_var_map"]`
+- [X] T003 [P] Update `BaseLikelihood.negative_log_likelihood` contract in `src/models/base.py` to accept optional `extra: Optional[dict[str, Any]] = None`
+- [X] T004 [P] Update `ELBOLoss.forward` in `src/models/losses/elbo.py` to pass `output.extra` into `self.likelihood.negative_log_likelihood`
+- [X] T005 Update composite `VAE` module in `src/models/vae.py` to intercept dual decoder output `(reconstruction, log_var_map)` and populate `output.extra["log_var_map"]`
 
 **Checkpoint**: Foundation ready — model component implementation and testing can now proceed.
 

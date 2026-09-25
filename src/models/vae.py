@@ -49,14 +49,21 @@ class VAE(nn.Module):
         features = self.encoder(x)
         posterior_dist = self.posterior(features)
         z = posterior_dist.sample()
-        reconstruction = self.decoder(z)
+        decoder_output = self.decoder(z)
+
+        if isinstance(decoder_output, tuple):
+            reconstruction, log_var_map = decoder_output
+            extra = {"log_var_map": log_var_map}
+        else:
+            reconstruction = decoder_output
+            extra = {}
 
         return VAEOutput(
             reconstruction=reconstruction,
             z=z,
             posterior=posterior_dist,
             prior=self.prior,
-            extra={},
+            extra=extra,
         )
 
     def compute_loss(self, output: VAEOutput, target: torch.Tensor) -> LossOutput:
@@ -88,7 +95,10 @@ class VAE(nn.Module):
         Returns:
             Observation tensor [B, C, H, W] in [-1, 1].
         """
-        return self.decoder(z)
+        out = self.decoder(z)
+        if isinstance(out, tuple):
+            return out[0]
+        return out
 
     def sample(self, num_samples: int, device: torch.device) -> torch.Tensor:
         """Synthesize novel samples by drawing latent vectors from the prior.
