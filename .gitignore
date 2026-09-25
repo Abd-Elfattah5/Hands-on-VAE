@@ -30,7 +30,7 @@ wheels/
 *:Zone.Identifier
 
 # Data & Model Artifacts
-data/
+/data/
 artifacts/
 checkpoints/
 runs/
