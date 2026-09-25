@@ -55,24 +55,9 @@ An analyst wants to encode test image pairs into 32-dimensional latent space and
 
 **Independent Test**: Can be fully tested by supplying two test images to the interpolation command and verifying the generation of an ordered sequence of intermediate images.
 
-**Acceptance Scenarios**:
+### Acceptance Scenarios:
 
 1. **Given** two test CIFAR-10 images and an interpolation step count $K=10$, **When** interpolation is executed, **Then** the system produces a continuous $K$-frame transition image strip showing smooth semantic transformations.
-
----
-
-### User Story 4 - Seamless Colab / Remote Training and Local Inference (Priority: P4)
-
-A user wanting higher throughput or multi-seed experiments wants to run training in Google Colab using a structured, self-contained notebook that imports the exact same codebase, saves checkpoints, and allows downloading weights for local CLI evaluation and image generation.
-
-**Why this priority**: Ensures flexibility between local workstation resources (Quadro T2000 4GB) and cloud accelerators without duplicating codebase logic.
-
-**Independent Test**: Can be verified by running the training pipeline via the notebook interface, exporting the checkpoint artifact, loading it via the local CLI, and running local sample generation.
-
-**Acceptance Scenarios**:
-
-1. **Given** the project repository in a Colab environment, **When** the notebook executes training, **Then** it produces a standard checkpoint compatible with the local CLI.
-2. **Given** a checkpoint trained remotely, **When** loaded into the local CLI environment, **Then** generation and evaluation commands execute successfully without schema or device mismatch.
 
 ---
 
@@ -125,9 +110,8 @@ The VAE codebase MUST be architected with an extensible Registry Pattern across 
 - **FR-004**: System MUST support continuous image tensors for CIFAR-10 ($3 \times 32 \times 32$), normalized to $[-1, 1]$ and bounded by `tanh` in the decoder reconstruction head.
 - **FR-005**: System MUST enforce deterministic execution across Python, NumPy, and PyTorch (CPU/CUDA) given a global seed argument.
 - **FR-006**: System MUST provide a unified CLI interface powered by Typer supporting `train`, `evaluate`, `generate`, and `interpolate` commands with structured logging.
-- **FR-007**: System MUST provide a companion Jupyter notebook for optional remote/cloud execution (e.g. Google Colab) using the exact same modular code and configuration files.
-- **FR-008**: System MUST serialize checkpoints containing model weights, configuration schema, optimizer state, epoch index, and validation metrics, and restore them cleanly across local and remote environments.
-- **FR-009**: System MUST execute automated tensor integrity tests validating dimensional preservation and non-zero gradient flow prior to training.
+- **FR-007**: System MUST serialize checkpoints containing model weights, configuration schema, optimizer state, epoch index, and validation metrics, and restore them cleanly across runs.
+- **FR-008**: System MUST execute automated tensor integrity tests validating dimensional preservation and non-zero gradient flow prior to training.
 
 ### Key Entities
 
@@ -144,10 +128,10 @@ The VAE codebase MUST be architected with an extensible Registry Pattern across 
 - **SC-002**: Automated tensor integrity unit tests verify that forward and backward passes execute with non-zero gradients throughout all layers and without NaN values.
 - **SC-003**: Training convergence verified by monotonic downward trend in validation ELBO across initial training epochs.
 - **SC-004**: Synthetic sample generation of 64 images completes in under 2 seconds on GPU and under 5 seconds on CPU.
-- **SC-005**: Checkpoints saved during remote Colab training load cleanly into the local CLI environment and produce identical sample outputs when given the same random seed.
+- **SC-005**: Checkpoints saved during training restore cleanly into the evaluation/generation commands and reproduce identical metric evaluations.
 
 ## Assumptions
 
 - **Target Dataset**: CIFAR-10 ($32 \times 32 \times 3$, 10 classes, 50,000 train / 10,000 test images), downloaded automatically via standard torchvision dataset utilities.
-- **Execution Interface**: Dual-access: Primary unified CLI (`src/cli/`) for local development, testing, and inference; secondary runnable notebook (`notebooks/`) for remote Colab training.
+- **Execution Interface**: Primary unified CLI (`src/cli/`) for local development, training, testing, evaluation, and inference.
 - **Hardware Profile**: Local execution verified on Intel i7-10850H CPU and NVIDIA Quadro T2000 (4GB VRAM) with CUDA 12.8.

@@ -20,12 +20,12 @@
 - [x] All acceptance scenarios are defined
 - [x] Edge cases are identified (variance explosion, posterior collapse, OOM)
 - [x] Scope is clearly bounded (CIFAR-10 baseline + pluggable registry)
-- [x] Dependencies and assumptions identified (Quadro T2000 + Colab notebook workflow)
+- [x] Dependencies and assumptions identified (Quadro T2000 local CLI workflow)
 
 ## Feature Readiness
 
 - [x] All functional requirements have clear acceptance criteria
-- [x] User scenarios cover primary flows (train, sample, interpolate, colab)
+- [x] User scenarios cover primary flows (train, sample, interpolate, evaluate)
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] Architectural design tree is fully resolved
 

@@ -40,6 +40,10 @@ _Avoid_: Batch normalization, layer scaling
 A decoupled factory pattern binding string identifiers in configuration schemas to modular neural and mathematical primitives.
 _Avoid_: Hardcoded switch, dynamic loader
 
+**VAEOutput**:
+A strongly-typed container encapsulating reconstructions, latent samples, posterior distributions, prior distributions, and auxiliary maps emitted from forward propagation.
+_Avoid_: Output tuple, model prediction
+
 ### Mathematical Operations & Objectives
 
 **Evidence Lower Bound (ELBO)**:

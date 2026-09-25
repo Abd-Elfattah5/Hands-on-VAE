@@ -30,7 +30,7 @@ wheels/
 *:Zone.Identifier
 
 # Data & Model Artifacts
-data/
+/data/
 artifacts/
 checkpoints/
 runs/
@@ -50,3 +50,7 @@ runs/
 # OS files
 .DS_Store
 Thumbs.db
+token.txt
+
+# Local / Untracked Documentation
+ARCHITECTURE_DEEP_DIVE.md
