@@ -83,11 +83,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T014 [US3] Execute test split quantitative evaluation via `vae evaluate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt`
-- [ ] T015 [US3] Execute quantitative benchmarking via `vae benchmark --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --num-samples 5000 --out artifacts/eval_enhanced/benchmark_metrics.json`
-- [ ] T016 [US3] Generate high-resolution $1024 \times 1024$ sample grid via `vae generate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --num-samples 64 --out artifacts/samples/enhanced_sample_grid_1024.png --upscale 4`
-- [ ] T017 [US3] Generate pure synthetic 2D prior manifold interpolation grid via `vae interpolate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --synthetic --steps 8 --out artifacts/interpolations/enhanced_synthetic_grid_2d.png --upscale 4`
-- [ ] T018 [US3] Generate comprehensive latent space diagnostics (t-SNE, PCA, 2D manifold, 1D sweeps, reconstruction gallery) via `vae plot-latent --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --out-dir artifacts/eval_enhanced`
+- [X] T014 [US3] Execute test split quantitative evaluation via `vae evaluate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt`
+- [X] T015 [US3] Execute quantitative benchmarking via `vae benchmark --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --num-samples 5000 --out artifacts/eval_enhanced/benchmark_metrics.json`
+- [X] T016 [US3] Generate high-resolution $1024 \times 1024$ sample grid via `vae generate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --num-samples 64 --out artifacts/samples/enhanced_sample_grid_1024.png --upscale 4`
+- [X] T017 [US3] Generate pure synthetic 2D prior manifold interpolation grid via `vae interpolate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --synthetic --steps 8 --out artifacts/interpolations/enhanced_synthetic_grid_2d.png --upscale 4`
+- [X] T018 [US3] Generate comprehensive latent space diagnostics (t-SNE, PCA, 2D manifold, 1D sweeps, reconstruction gallery) via `vae plot-latent --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --out-dir artifacts/eval_enhanced`
 
 **Checkpoint**: All quantitative benchmark metrics and qualitative visual plates generated and persisted.
 
