@@ -170,7 +170,8 @@ Phase 6: Polish & Cross-Cutting Concerns
 │   ├── samples/                     # 1024x1024 prior sample grids
 │   └── runs/                        # Checkpoints (.pt) and training trajectories
 ├── vae_colab_diagnostic.ipynb       # (Untracked / gitignored) Self-contained Colab notebook:
-│                                    # Enlarged Conv (8.8M params), d=512, Full Covariance
+│                                    # Enlarged Conv (8.8M params), d=512, Full Covariance,
+│                                    # and GMM Prior (K=10 multimodal modes) testing.
 └── README.md                        # Project overview and reproduction guide
 ```
 
