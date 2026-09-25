@@ -37,6 +37,8 @@ runs/
 *.pt
 *.pth
 *.onnx
+*.pdf
+GenCV003.pdf
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
