@@ -4,7 +4,7 @@
 **Current Branch**: `002-enhanced-vae`  
 **Base Branch**: `main` (Merged PR #2, commit `1b4b6ed`)  
 **Assignment Reference**: `GenCV003` (Computer Vision Engineer - Generative Modeling Benchmark)  
-**Status**: Feature `002-enhanced-vae` Designed & Planned (`T001`–`T021`); Ready for Implementation  
+**Status**: Feature `002-enhanced-vae` 100% Completed, Verified, Benchmarked, and Documented (`T001`–`T021`)  
 
 ---
 
@@ -19,8 +19,12 @@ This repository contains a modular from-scratch implementation and benchmarking 
   - Formal Technical Report Deliverable (a) authored at `docs/reports/001-baseline-vae-report.md`.
   - Reproduction Guide Deliverable (b) documented in root `README.md`.
 
-* **Current Active Milestone (`002-enhanced-vae`)**:
-  A branch dedicated to mitigating CIFAR-10 blurriness and improving FID via **heteroscedastic pixel-wise observation likelihood with $\beta$-NLL stabilization** and **expanded latent bottleneck capacity ($d=128$)**.
+* **Enhanced VAE Milestone (`002-enhanced-vae` Completed)**:
+  Mitigated CIFAR-10 blurriness and evaluated spatial uncertainty via **heteroscedastic pixel-wise observation likelihood with $\beta$-NLL stabilization ($\beta=0.5$)** and **expanded latent bottleneck capacity ($d=128$)**.
+  - CIFAR-10 Enhanced (50 Ep): Test ELBO **-580.29**, Recon MSE **0.0563** (improved), Active Units **128/128** (100% capacity), Real Test PSNR **18.3 dB** (improved from 18.1 dB, MSE **0.0147** vs **0.0156**), FID **181.00**, IS **1.68 ± 0.04**.
+  - Peak GPU VRAM measured: **$240.78\text{ MB}$** (only ~6% of 4GB Quadro T2000).
+  - Comparative Technical Report authored at `docs/reports/002-enhanced-vae-report.md`.
+  - All 38 automated unit tests pass with 100% success rate.
 
 ---
 
@@ -70,41 +74,41 @@ Before designing `002-enhanced-vae`, we executed empirical memory allocation and
 - `quickstart.md`: Single-line CLI validation and benchmarking commands.
 - `tasks.md`: 21 test-driven tasks across 6 phases (`T001`–`T021`).
 
-### Task Breakdown (`specs/002-enhanced-vae/tasks.md`)
+### Task Breakdown (`specs/002-enhanced-vae/tasks.md` - All Completed)
 
 ```text
 Phase 1: Setup (Configuration & Schema Validation)
-- [ ] T001 [P] Create configs/cifar10_enhanced.yaml (d=128, cnn_hetero, gaussian_hetero, beta_nll=0.5, 50 epochs)
-- [ ] T002 [P] Extend schema validator in src/configs/schema.py for cnn_hetero and gaussian_hetero
+- [X] T001 [P] Create configs/cifar10_enhanced.yaml (d=128, cnn_hetero, gaussian_hetero, beta_nll=0.5, 50 epochs)
+- [X] T002 [P] Extend schema validator in src/configs/schema.py for cnn_hetero and gaussian_hetero
 
 Phase 2: Foundational (Interface Adaptors & Contracts)
-- [ ] T003 [P] Update BaseLikelihood.negative_log_likelihood in src/models/base.py to accept extra
-- [ ] T004 [P] Update ELBOLoss.forward in src/models/losses/elbo.py to pass output.extra
-- [ ] T005 Update composite VAE in src/models/vae.py to populate output.extra["log_var_map"] from dual decoder
+- [X] T003 [P] Update BaseLikelihood.negative_log_likelihood in src/models/base.py to accept extra
+- [X] T004 [P] Update ELBOLoss.forward in src/models/losses/elbo.py to pass output.extra
+- [X] T005 Update composite VAE in src/models/vae.py to populate output.extra["log_var_map"] from dual decoder
 
 Phase 3: User Story 1 - Heteroscedastic Likelihood & Beta-NLL (Priority: P1) 🎯 MVP
-- [ ] T006 [P] [US1] Unit test for HeteroscedasticCNNDecoder shapes and clamping in tests/unit/test_heteroscedastic.py
-- [ ] T007 [P] [US1] Unit test for HeteroscedasticGaussianLikelihood beta-NLL in tests/unit/test_heteroscedastic.py
-- [ ] T008 [P] [US1] Implement HeteroscedasticCNNDecoder in src/models/decoders/cnn_hetero.py
-- [ ] T009 [P] [US1] Implement HeteroscedasticGaussianLikelihood in src/models/likelihoods/gaussian_hetero.py
-- [ ] T010 [US1] Register cnn_hetero and gaussian_hetero in src/models/registry.py and package __init__.py
-- [ ] T011 [US1] Run pre-training architecture integrity check: vae verify --config configs/cifar10_enhanced.yaml
+- [X] T006 [P] [US1] Unit test for HeteroscedasticCNNDecoder shapes and clamping in tests/unit/test_heteroscedastic.py
+- [X] T007 [P] [US1] Unit test for HeteroscedasticGaussianLikelihood beta-NLL in tests/unit/test_heteroscedastic.py
+- [X] T008 [P] [US1] Implement HeteroscedasticCNNDecoder in src/models/decoders/cnn_hetero.py
+- [X] T009 [P] [US1] Implement HeteroscedasticGaussianLikelihood in src/models/likelihoods/gaussian_hetero.py
+- [X] T010 [US1] Register cnn_hetero and gaussian_hetero in src/models/registry.py and package __init__.py
+- [X] T011 [US1] Run pre-training architecture integrity check: vae verify --config configs/cifar10_enhanced.yaml
 
 Phase 4: User Story 2 - Expanded Latent Representation Capacity (d=128) (Priority: P2)
-- [ ] T012 [P] [US2] Unit test for 128-dim latent space forward pass in tests/unit/test_heteroscedastic.py
-- [ ] T013 [US2] Train 50 epochs on CIFAR-10: vae train --config configs/cifar10_enhanced.yaml --epochs 50
+- [X] T012 [P] [US2] Unit test for 128-dim latent space forward pass in tests/unit/test_heteroscedastic.py
+- [X] T013 [US2] Train 50 epochs on CIFAR-10: vae train --config configs/cifar10_enhanced.yaml --epochs 50
 
 Phase 5: User Story 3 - Comparative Quantitative & Qualitative Benchmarking (Priority: P3)
-- [ ] T014 [US3] Evaluate test partition: vae evaluate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt
-- [ ] T015 [US3] Quantitative benchmark (FID, IS): vae benchmark --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt
-- [ ] T016 [US3] High-res sample grid: vae generate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --upscale 4
-- [ ] T017 [US3] Synthetic 2D interpolation: vae interpolate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --synthetic
-- [ ] T018 [US3] Latent diagnostics (t-SNE, PCA, 2D manifold, sweeps): vae plot-latent --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt
+- [X] T014 [US3] Evaluate test partition: vae evaluate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt
+- [X] T015 [US3] Quantitative benchmark (FID, IS): vae benchmark --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt
+- [X] T016 [US3] High-res sample grid: vae generate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --upscale 4
+- [X] T017 [US3] Synthetic 2D interpolation: vae interpolate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --synthetic
+- [X] T018 [US3] Latent diagnostics (t-SNE, PCA, 2D manifold, sweeps): vae plot-latent --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt
 
 Phase 6: Polish & Cross-Cutting Concerns
-- [ ] T019 [P] Author comparative Technical Report docs/reports/002-enhanced-vae-report.md
-- [ ] T020 [P] Update root README.md benchmark table
-- [ ] T021 Run full unit test suite: pytest tests/ -v (ensure 100% pass rate)
+- [X] T019 [P] Author comparative Technical Report docs/reports/002-enhanced-vae-report.md
+- [X] T020 [P] Update root README.md benchmark table
+- [X] T021 Run full unit test suite: pytest tests/ -v (ensure 100% pass rate)
 ```
 
 ---
