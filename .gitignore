@@ -40,6 +40,7 @@ runs/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+*.ipynb
 
 # IDE / Editor
 .vscode/
