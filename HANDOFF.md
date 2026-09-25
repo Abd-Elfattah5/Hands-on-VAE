@@ -169,6 +169,14 @@ Phase 6: Polish & Cross-Cutting Concerns
 │   ├── interpolations/              # Synthetic 2D grids and strips
 │   ├── samples/                     # 1024x1024 prior sample grids
 │   └── runs/                        # Checkpoints (.pt) and training trajectories
+├── graphify-out/                    # Committed Knowledge Graph artifacts:
+│   ├── graph.html                   # Interactive navigable graph (open in browser)
+│   ├── graph.json                   # Machine-readable node and edge graph data
+│   ├── GRAPH_REPORT.md              # Knowledge graph audit report with community detection
+│   └── manifest.json                # Graphify extraction manifest
+├── ARCHITECTURE_DEEP_DIVE.md        # Comprehensive technical and mathematical deep dive (Sections 1-13)
+├── Architecture_visualization.jpg   # High-resolution architectural diagram
+├── architectural_enhancements_taxonomy.html # Reference taxonomy of VAE architectural extension paths
 ├── vae_colab_diagnostic.ipynb       # (Untracked / gitignored) Self-contained Colab notebook:
 │                                    # Enlarged Conv (8.8M params), d=512, Full Covariance,
 │                                    # and GMM Prior (K=10 multimodal modes) testing.
