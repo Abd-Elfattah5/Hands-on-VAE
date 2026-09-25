@@ -65,11 +65,11 @@
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T012 [P] [US2] Unit test verifying 128-dimensional latent space forward pass, reparameterization, and shape preservation in `tests/unit/test_heteroscedastic.py`
+- [X] T012 [P] [US2] Unit test verifying 128-dimensional latent space forward pass, reparameterization, and shape preservation in `tests/unit/test_heteroscedastic.py`
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Execute 50-epoch training on CIFAR-10 via `vae train --config configs/cifar10_enhanced.yaml --epochs 50 --batch-size 128`
+- [X] T013 [US2] Execute 50-epoch training on CIFAR-10 via `vae train --config configs/cifar10_enhanced.yaml --epochs 50 --batch-size 128`
 
 **Checkpoint**: Enhanced model trained for 50 epochs with checkpoints and trajectories saved in `artifacts/runs/cifar10_enhanced/`.
 

@@ -60,3 +60,24 @@ def test_beta_nll_likelihood_calculation_and_gradients():
     assert log_var.grad is not None
     assert torch.all(torch.isfinite(mu.grad))
     assert torch.all(torch.isfinite(log_var.grad))
+
+
+def test_latent_dim_128_forward_and_loss():
+    """Verify 128-dimensional latent space forward pass and loss computation."""
+    from src.configs.schema import load_config
+    from src.models.registry import build_vae_from_config
+
+    cfg = load_config("configs/cifar10_enhanced.yaml")
+    vae = build_vae_from_config(cfg)
+
+    x = torch.randn(2, 3, 32, 32).clamp(-1.0, 1.0)
+    output = vae(x)
+
+    assert output.z.shape == (2, 128)
+    assert output.reconstruction.shape == (2, 3, 32, 32)
+    assert "log_var_map" in output.extra
+    assert output.extra["log_var_map"].shape == (2, 3, 32, 32)
+
+    loss_output = vae.compute_loss(output, x)
+    assert torch.isfinite(loss_output.loss)
+    assert loss_output.loss.requires_grad
