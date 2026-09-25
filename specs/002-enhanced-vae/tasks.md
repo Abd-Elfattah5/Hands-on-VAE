@@ -43,15 +43,15 @@
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T006 [P] [US1] Unit test for `HeteroscedasticCNNDecoder` dual output shapes and clamp range `[-10.0, 5.0]` in `tests/unit/test_heteroscedastic.py`
-- [ ] T007 [P] [US1] Unit test for `HeteroscedasticGaussianLikelihood` $\beta$-NLL loss calculation and gradient stabilization in `tests/unit/test_heteroscedastic.py`
+- [X] T006 [P] [US1] Unit test for `HeteroscedasticCNNDecoder` dual output shapes and clamp range `[-10.0, 5.0]` in `tests/unit/test_heteroscedastic.py`
+- [X] T007 [P] [US1] Unit test for `HeteroscedasticGaussianLikelihood` $\beta$-NLL loss calculation and gradient stabilization in `tests/unit/test_heteroscedastic.py`
 
 ### Implementation for User Story 1
 
-- [ ] T008 [P] [US1] Implement `HeteroscedasticCNNDecoder` with dual prediction heads (`head_mu` with `tanh`, `head_log_var` clamped to `[-10.0, 5.0]`) in `src/models/decoders/cnn_hetero.py`
-- [ ] T009 [P] [US1] Implement `HeteroscedasticGaussianLikelihood` computing $\beta$-NLL loss with $(\sigma^{2\beta})_{\text{detached}}$ weighting in `src/models/likelihoods/gaussian_hetero.py`
-- [ ] T010 [US1] Register `"cnn_hetero"` and `"gaussian_hetero"` in `src/models/registry.py` and export in package `__init__.py` files
-- [ ] T011 [US1] Execute pre-training architecture integrity verification via `vae verify --config configs/cifar10_enhanced.yaml`
+- [X] T008 [P] [US1] Implement `HeteroscedasticCNNDecoder` with dual prediction heads (`head_mu` with `tanh`, `head_log_var` clamped to `[-10.0, 5.0]`) in `src/models/decoders/cnn_hetero.py`
+- [X] T009 [P] [US1] Implement `HeteroscedasticGaussianLikelihood` computing $\beta$-NLL loss with $(\sigma^{2\beta})_{\text{detached}}$ weighting in `src/models/likelihoods/gaussian_hetero.py`
+- [X] T010 [US1] Register `"cnn_hetero"` and `"gaussian_hetero"` in `src/models/registry.py` and export in package `__init__.py` files
+- [X] T011 [US1] Execute pre-training architecture integrity verification via `vae verify --config configs/cifar10_enhanced.yaml`
 
 **Checkpoint**: At this point, User Story 1 is verified and fully functional as the standalone MVP.
 

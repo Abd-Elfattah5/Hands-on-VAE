@@ -1,5 +1,6 @@
 """Observation likelihood models."""
 
+from src.models.likelihoods.gaussian_hetero import HeteroscedasticGaussianLikelihood
 from src.models.likelihoods.gaussian_homo import HomoscedasticGaussianLikelihood
 
-__all__ = ["HomoscedasticGaussianLikelihood"]
+__all__ = ["HomoscedasticGaussianLikelihood", "HeteroscedasticGaussianLikelihood"]
