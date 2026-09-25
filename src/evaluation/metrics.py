@@ -36,6 +36,10 @@ class InceptionFeatureExtractor(nn.Module):
         Returns:
             Tuple of (features [B, 2048], probs [B, 1000]).
         """
+        # Expand 1-channel images (e.g. MNIST) to 3 channels for Inception-v3
+        if x.size(1) == 1:
+            x = x.repeat(1, 3, 1, 1)
+
         # Resize from 32x32 to 299x299 as expected by Inception-v3
         x_299 = F.interpolate(x, size=(299, 299), mode="bilinear", align_corners=False)
         # Normalize to Inception's expected [-1, 1] input range

@@ -183,17 +183,35 @@ def train(
     typer.echo(f"Starting VAE training using configuration: {config}")
     trainer = VAETrainer(config=raw_cfg)
 
+    start_epoch = 1
     if resume is not None:
         typer.echo(f"Resuming training from checkpoint: {resume}")
-        restore_model_from_checkpoint(resume, model=trainer.model)
+        start_epoch = trainer.resume_from_checkpoint(resume)
 
-    results = trainer.train()
+    results = trainer.train(start_epoch=start_epoch)
     typer.secho(
         f"Training complete! Best validation loss: {results['best_val_loss']:.4f}\n"
         f"Checkpoints saved in: {trainer.output_dir}",
         fg=typer.colors.GREEN,
         bold=True,
     )
+
+
+def _get_dataloaders_from_config(
+    config: dict,
+    data_dir: Optional[Path] = None,
+    batch_size: int = 128,
+):
+    dataset_name = config.get("data", {}).get("dataset", "cifar10").lower()
+    target_data_dir = str(data_dir) if data_dir else config.get("data", {}).get("data_dir", "data")
+    seed = config.get("experiment", {}).get("seed", 42)
+
+    if dataset_name == "mnist":
+        from src.data.mnist import get_mnist_dataloaders
+        return get_mnist_dataloaders(data_dir=target_data_dir, batch_size=batch_size, seed=seed)
+    else:
+        from src.data.cifar10 import get_cifar10_dataloaders
+        return get_cifar10_dataloaders(data_dir=target_data_dir, batch_size=batch_size, seed=seed)
 
 
 @app.command()
@@ -219,19 +237,12 @@ def evaluate(
         help="Evaluation batch size.",
     ),
 ) -> None:
-    """Evaluate a saved model checkpoint on CIFAR-10 test split."""
+    """Evaluate a saved model checkpoint on test split."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, ckpt_dict = restore_model_from_checkpoint(checkpoint, map_location=device)
     config = ckpt_dict.get("config", {})
 
-    target_data_dir = str(data_dir) if data_dir else config.get("data", {}).get("data_dir", "data")
-    seed = config.get("experiment", {}).get("seed", 42)
-
-    _, _, test_loader = get_cifar10_dataloaders(
-        data_dir=target_data_dir,
-        batch_size=batch_size,
-        seed=seed,
-    )
+    _, _, test_loader = _get_dataloaders_from_config(config, data_dir=data_dir, batch_size=batch_size)
 
     metrics = evaluate_model(model=model, data_loader=test_loader, device=device)
     latent_dim = config.get("model", {}).get("latent_dim", 32)
@@ -440,14 +451,7 @@ def benchmark(
     model, ckpt_dict = restore_model_from_checkpoint(checkpoint, map_location=device)
     config = ckpt_dict.get("config", {})
 
-    target_data_dir = config.get("data", {}).get("data_dir", "data")
-    seed = config.get("experiment", {}).get("seed", 42)
-
-    _, _, test_loader = get_cifar10_dataloaders(
-        data_dir=target_data_dir,
-        batch_size=batch_size,
-        seed=seed,
-    )
+    _, _, test_loader = _get_dataloaders_from_config(config, batch_size=batch_size)
 
     typer.echo("Step 1/2: Evaluating test split ELBO, reconstruction error, and active latent units...")
     eval_metrics = evaluate_model(model=model, data_loader=test_loader, device=device)
@@ -532,14 +536,10 @@ def plot_latent(
     model, ckpt_dict = restore_model_from_checkpoint(checkpoint, map_location=device)
     config = ckpt_dict.get("config", {})
 
-    target_data_dir = config.get("data", {}).get("data_dir", "data")
-    seed = config.get("experiment", {}).get("seed", 42)
+    _, _, test_loader = _get_dataloaders_from_config(config, batch_size=128)
 
-    _, _, test_loader = get_cifar10_dataloaders(
-        data_dir=target_data_dir,
-        batch_size=128,
-        seed=seed,
-    )
+    dataset_name = config.get("data", {}).get("dataset", "cifar10").lower()
+    classes = [f"Digit {i}" for i in range(10)] if dataset_name == "mnist" else None
 
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -548,10 +548,10 @@ def plot_latent(
     mu_arr, labels_arr = extract_latent_embeddings(model=model, data_loader=test_loader, device=device, max_samples=num_samples)
 
     typer.echo("Generating t-SNE scatter plot...")
-    tsne_path = plot_latent_tsne(mu_arr, labels_arr, out_path=out_dir / "latent_tsne.png")
+    tsne_path = plot_latent_tsne(mu_arr, labels_arr, out_path=out_dir / "latent_tsne.png", class_names=classes)
 
     typer.echo("Generating PCA scatter plot...")
-    pca_path = plot_latent_pca(mu_arr, labels_arr, out_path=out_dir / "latent_pca.png")
+    pca_path = plot_latent_pca(mu_arr, labels_arr, out_path=out_dir / "latent_pca.png", class_names=classes)
 
     typer.echo(f"Generating 2D manifold traversal grid ({grid_size}x{grid_size}) along dimensions ({dim_x}, {dim_y})...")
     manifold_path = plot_2d_latent_manifold(

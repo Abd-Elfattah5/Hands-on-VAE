@@ -163,6 +163,15 @@ def test_validate_cifar10_baseline_config():
     assert exp_cfg.training.epochs == 50
 
 
+def test_validate_mnist_baseline_config():
+    cfg = load_config("configs/mnist_baseline.yaml")
+    exp_cfg = validate_config(cfg)
+    assert exp_cfg.experiment.name == "mnist_baseline"
+    assert exp_cfg.model.in_channels == 1
+    assert exp_cfg.model.latent_dim == 32
+    assert exp_cfg.data.dataset == "mnist"
+
+
 def test_schema_dimensional_validation():
     cfg = load_config("configs/cifar10_baseline.yaml")
 
@@ -234,3 +243,16 @@ def test_vae_collate_fn():
     with pytest.raises(ValueError) as exc_info:
         vae_collate_fn(invalid_batch)
     assert "outside [-1, 1] bounds" in str(exc_info.value)
+
+
+def test_mnist_transforms():
+    from src.data.mnist import get_mnist_transforms
+    transforms = get_mnist_transforms()
+
+    img_black = Image.new("L", (28, 28), 0)
+    t = transforms(img_black)
+
+    # 28x28 padded with 2 on all sides -> 32x32
+    assert t.shape == (1, 32, 32)
+    # 0 normalized with mean=0.5, std=0.5 -> -1.0
+    assert torch.allclose(t, torch.full_like(t, -1.0), atol=1e-3)

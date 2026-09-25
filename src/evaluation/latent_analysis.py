@@ -72,9 +72,11 @@ def plot_latent_tsne(
     out_path: str | Path = "artifacts/eval/latent_tsne.png",
     num_prior_samples: int = 500,
     random_state: int = 42,
+    class_names: Optional[Sequence[str]] = None,
 ) -> Path:
     """Project latent representations into 2D via t-SNE and render class-colored scatter plot."""
     latent_dim = mu_array.shape[1]
+    classes = class_names if class_names is not None else CIFAR10_CLASSES
 
     # Combine posterior samples with standard Gaussian prior samples for alignment check
     prior_samples = np.random.randn(num_prior_samples, latent_dim)
@@ -101,15 +103,15 @@ def plot_latent_tsne(
 
     # Plot data points colored by class
     cmap = plt.get_cmap("tab10")
-    for class_idx, class_name in enumerate(CIFAR10_CLASSES):
+    for class_idx, class_name in enumerate(classes):
         mask = labels == class_idx
         ax.scatter(
             mu_embedded[mask, 0],
             mu_embedded[mask, 1],
-            color=cmap(class_idx),
+            color=cmap(class_idx % 10),
             alpha=0.7,
             s=20,
-            label=class_name,
+            label=str(class_name),
             edgecolors="none",
         )
 
@@ -132,10 +134,12 @@ def plot_latent_pca(
     labels: np.ndarray,
     out_path: str | Path = "artifacts/eval/latent_pca.png",
     num_prior_samples: int = 500,
+    class_names: Optional[Sequence[str]] = None,
 ) -> Path:
     """Project latent representations into 2D via PCA and plot principal variance axes."""
     latent_dim = mu_array.shape[1]
     prior_samples = np.random.randn(num_prior_samples, latent_dim)
+    classes = class_names if class_names is not None else CIFAR10_CLASSES
 
     pca = PCA(n_components=2)
     pca.fit(mu_array)
@@ -159,15 +163,15 @@ def plot_latent_pca(
     )
 
     cmap = plt.get_cmap("tab10")
-    for class_idx, class_name in enumerate(CIFAR10_CLASSES):
+    for class_idx, class_name in enumerate(classes):
         mask = labels == class_idx
         ax.scatter(
             mu_pca[mask, 0],
             mu_pca[mask, 1],
-            color=cmap(class_idx),
+            color=cmap(class_idx % 10),
             alpha=0.7,
             s=20,
-            label=class_name,
+            label=str(class_name),
             edgecolors="none",
         )
 

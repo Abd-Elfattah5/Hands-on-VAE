@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -57,17 +57,28 @@ class VAETrainer:
 
         # DataLoaders
         data_cfg = config.get("data", {})
+        dataset_name = data_cfg.get("dataset", "cifar10").lower()
         if train_loader is not None and val_loader is not None:
             self.train_loader = train_loader
             self.val_loader = val_loader
         else:
-            t_loader, v_loader, _ = get_cifar10_dataloaders(
-                data_dir=data_cfg.get("data_dir", "data"),
-                batch_size=data_cfg.get("batch_size", 128),
-                val_split=data_cfg.get("val_split", 0.1),
-                num_workers=data_cfg.get("num_workers", 4),
-                seed=self.seed,
-            )
+            if dataset_name == "mnist":
+                from src.data.mnist import get_mnist_dataloaders
+                t_loader, v_loader, _ = get_mnist_dataloaders(
+                    data_dir=data_cfg.get("data_dir", "data"),
+                    batch_size=data_cfg.get("batch_size", 128),
+                    val_split=data_cfg.get("val_split", 0.1),
+                    num_workers=data_cfg.get("num_workers", 4),
+                    seed=self.seed,
+                )
+            else:
+                t_loader, v_loader, _ = get_cifar10_dataloaders(
+                    data_dir=data_cfg.get("data_dir", "data"),
+                    batch_size=data_cfg.get("batch_size", 128),
+                    val_split=data_cfg.get("val_split", 0.1),
+                    num_workers=data_cfg.get("num_workers", 4),
+                    seed=self.seed,
+                )
             self.train_loader = t_loader
             self.val_loader = v_loader
 
@@ -169,11 +180,26 @@ class VAETrainer:
             "val_kl": total_kl / num_batches,
         }
 
-    def train(self) -> dict[str, Any]:
-        """Run complete training lifecycle across all configured epochs."""
-        self.logger.info(f"Starting training run for {self.epochs} epochs")
+    def resume_from_checkpoint(self, path: Union[Path, str]) -> int:
+        """Load model, optimizer, scheduler state from checkpoint and return next epoch."""
+        from src.training.checkpoint import load_checkpoint
+        ckpt = load_checkpoint(path, map_location=self.device)
+        self.model.load_state_dict(ckpt["model_state_dict"])
+        if ckpt.get("optimizer_state_dict") and self.optimizer is not None:
+            self.optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+        if ckpt.get("scheduler_state_dict") and self.scheduler is not None:
+            self.scheduler.load_state_dict(ckpt["scheduler_state_dict"])
+        self.global_step = ckpt.get("global_step", 0)
+        self.best_val_loss = ckpt.get("metrics", {}).get("val_loss", float("inf"))
+        start_epoch = ckpt.get("epoch", 0) + 1
+        self.logger.info(f"Resumed from checkpoint {path} at epoch {start_epoch}")
+        return start_epoch
 
-        for epoch in range(1, self.epochs + 1):
+    def train(self, start_epoch: int = 1) -> dict[str, Any]:
+        """Run complete training lifecycle across all configured epochs."""
+        self.logger.info(f"Starting training run from epoch {start_epoch} to {self.epochs}")
+
+        for epoch in range(start_epoch, self.epochs + 1):
             train_metrics = self.train_epoch(epoch)
             val_metrics = self.validate(epoch)
 
