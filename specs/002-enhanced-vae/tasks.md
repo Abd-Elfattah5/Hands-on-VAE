@@ -97,9 +97,9 @@
 
 **Purpose**: Formalize comparative findings, update project documentation, and ensure 100% test suite pass rate.
 
-- [ ] T019 [P] Author comparative Technical Report in `docs/reports/002-enhanced-vae-report.md` analyzing baseline vs. enhanced results (FID, PSNR, edge sharpness, uncertainty maps)
-- [ ] T020 [P] Update root `README.md` benchmark summary table comparing Baseline ($d=32$, homoscedastic) vs. Enhanced ($d=128$, $\beta$-NLL heteroscedastic)
-- [ ] T021 Run full automated test suite `pytest tests/ -v` verifying 100% pass rate with zero regressions
+- [X] T019 [P] Author comparative Technical Report in `docs/reports/002-enhanced-vae-report.md` analyzing baseline vs. enhanced results (FID, PSNR, edge sharpness, uncertainty maps)
+- [X] T020 [P] Update root `README.md` benchmark summary table comparing Baseline ($d=32$, homoscedastic) vs. Enhanced ($d=128$, $\beta$-NLL heteroscedastic)
+- [X] T021 Run full automated test suite `pytest tests/ -v` verifying 100% pass rate with zero regressions
 
 ---
 
