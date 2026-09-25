@@ -18,8 +18,8 @@
 
 **Purpose**: Establish declarative configuration and schema validation for heteroscedastic likelihood and expanded latent space.
 
-- [ ] T001 [P] Create declarative enhanced configuration in `configs/cifar10_enhanced.yaml` specifying `latent_dim: 128`, `decoder.name: "cnn_hetero"`, and `likelihood.name: "gaussian_hetero"` with `beta_nll: 0.5`
-- [ ] T002 [P] Extend configuration schema validator in `src/configs/schema.py` to validate `cnn_hetero` decoder clamp ranges and `gaussian_hetero` likelihood parameters
+- [X] T001 [P] Create declarative enhanced configuration in `configs/cifar10_enhanced.yaml` specifying `latent_dim: 128`, `decoder.name: "cnn_hetero"`, and `likelihood.name: "gaussian_hetero"` with `beta_nll: 0.5`
+- [X] T002 [P] Extend configuration schema validator in `src/configs/schema.py` to validate `cnn_hetero` decoder clamp ranges and `gaussian_hetero` likelihood parameters
 
 ---
 

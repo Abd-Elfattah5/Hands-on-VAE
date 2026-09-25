@@ -148,7 +148,7 @@ def validate_model_config(model_cfg: dict[str, Any]) -> None:
     dec = model_cfg["decoder"]
     if not isinstance(dec, dict) or "name" not in dec:
         raise ConfigError("decoder configuration must be a mapping with a 'name' key")
-    if dec["name"] == "cnn":
+    if dec["name"] in ("cnn", "cnn_hetero"):
         channels = dec.get("channels", [128, 64, 32])
         if not isinstance(channels, list) or len(channels) == 0:
             raise ConfigError("CNN decoder channels must be a non-empty list of integers")
@@ -158,6 +158,11 @@ def validate_model_config(model_cfg: dict[str, Any]) -> None:
                 raise ConfigError(
                     f"CNN decoder channel {c} at stage {i} is not divisible by num_groups={num_groups}"
                 )
+        if dec["name"] == "cnn_hetero":
+            clamp_min = dec.get("clamp_min", -10.0)
+            clamp_max = dec.get("clamp_max", 5.0)
+            if clamp_min >= clamp_max:
+                raise ConfigError(f"clamp_min ({clamp_min}) must be strictly less than clamp_max ({clamp_max})")
 
     # Validate Likelihood
     like = model_cfg["likelihood"]
@@ -167,6 +172,10 @@ def validate_model_config(model_cfg: dict[str, Any]) -> None:
         fixed_sigma = like.get("fixed_sigma", 1.0)
         if fixed_sigma <= 0:
             raise ConfigError(f"gaussian_homo fixed_sigma must be positive, got: {fixed_sigma}")
+    elif like["name"] == "gaussian_hetero":
+        beta_nll = like.get("beta_nll", 0.5)
+        if not (0.0 <= beta_nll <= 1.0):
+            raise ConfigError(f"gaussian_hetero beta_nll must be in range [0.0, 1.0], got: {beta_nll}")
 
     # Validate Loss
     loss = model_cfg["loss"]
