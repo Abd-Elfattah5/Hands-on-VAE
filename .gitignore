@@ -37,9 +37,12 @@ runs/
 *.pt
 *.pth
 *.onnx
+*.pdf
+GenCV003.pdf
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+*.ipynb
 
 # IDE / Editor
 .vscode/
@@ -52,5 +55,6 @@ runs/
 Thumbs.db
 token.txt
 
-# Local / Untracked Documentation
-ARCHITECTURE_DEEP_DIVE.md
+# Graphify local interpreter & cache
+graphify-out/.graphify_*
+graphify-out/cache/

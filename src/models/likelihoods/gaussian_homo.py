@@ -1,6 +1,7 @@
 """Homoscedastic Gaussian observation likelihood."""
 
 import math
+from typing import Any
 import torch
 
 from src.models.base import BaseLikelihood
@@ -18,13 +19,17 @@ class HomoscedasticGaussianLikelihood(BaseLikelihood):
         self.include_constant = include_constant
 
     def negative_log_likelihood(
-        self, reconstruction: torch.Tensor, target: torch.Tensor
+        self,
+        reconstruction: torch.Tensor,
+        target: torch.Tensor,
+        extra: Any = None,
     ) -> torch.Tensor:
         """Compute negative log-likelihood per batch element.
 
         Args:
             reconstruction: Model output mean tensor [B, C, H, W].
             target: Ground-truth target image tensor [B, C, H, W].
+            extra: Optional auxiliary outputs dictionary.
 
         Returns:
             Tensor of shape [B] containing NLL per sample.

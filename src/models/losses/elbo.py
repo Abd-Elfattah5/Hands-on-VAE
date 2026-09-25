@@ -27,7 +27,9 @@ class ELBOLoss(BaseLoss):
             LossOutput containing scalar loss and detached diagnostic components.
         """
         # Reconstruction negative log-likelihood per sample [B]
-        nll_per_sample = self.likelihood.negative_log_likelihood(output.reconstruction, target)
+        nll_per_sample = self.likelihood.negative_log_likelihood(
+            output.reconstruction, target, extra=output.extra
+        )
 
         # Analytical KL divergence per sample [B]
         kl_per_sample = output.prior.kl_divergence(output.posterior)

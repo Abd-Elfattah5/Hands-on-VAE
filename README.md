@@ -21,20 +21,24 @@ This repository contains a ground-up implementation of a continuous **Variationa
 
 ---
 
-## Baseline Benchmark Results (CIFAR-10, 50 Epochs)
+## Quantitative Benchmark Results (CIFAR-10, 50 Epochs)
 
-| Metric | Baseline VAE Value | Notes |
-| :--- | :---: | :--- |
-| **Test ELBO** | **122.53** | Decomposed variational objective |
-| **Reconstruction MSE** | **0.0578** | Test split mean squared error |
-| **KL Divergence** | **33.82 nats** | $\approx 1.05$ nats / dimension |
-| **Active Latent Units ($A_z$)** | **32 / 32** | $100\%$ capacity utilization ($\text{Var}(\mu_j) > 0.01$) |
-| **Reconstruction PSNR** | **18.1 dB** | Evaluated on test partition (MSE: $0.0156$) |
-| **Fréchet Inception Distance (FID)** | **169.02** | Computed over 5,000 real vs. synthetic samples |
-| **Inception Score (IS)** | **2.11 ± 0.03** | Inception-v3 probability distribution |
-| **Peak GPU VRAM** | **1.82 GB** | Local NVIDIA Quadro T2000 (Budget: $<2.5\text{ GB}$) |
+| Metric | Baseline VAE (`001`) | Enhanced VAE (`002`) | Notes |
+| :--- | :---: | :---: | :--- |
+| **Observation Likelihood** | Homoscedastic (Fixed $\sigma^2=1.0$) | Heteroscedastic + $\beta$-NLL ($\beta=0.5$) | Pixel-wise adaptive uncertainty |
+| **Latent Dimension ($d$)** | **32** | **128** | $4\times$ expanded bottleneck bandwidth |
+| **Model Parameters** | **1.60 M** | **2.25 M** | $+0.65\text{M}$ parameters |
+| **Reconstruction MSE (Test)** | **0.0578** | **0.0563** | Test partition pixel error (Improved) |
+| **Gallery Test PSNR** | **18.1 dB** (MSE: 0.0156) | **18.3 dB** (MSE: 0.0147) | Evaluated on real test images (Improved) |
+| **KL Divergence** | **33.82 nats** | **92.32 nats** | $\approx 0.72$ nats / dimension |
+| **Active Latent Units ($A_z$)** | **32 / 32** | **128 / 128** | $100\%$ capacity utilization ($\text{Var}(\mu_j) > 0.01$) |
+| **Fréchet Inception Distance (FID)** | **169.02** | **181.00** | Evaluated on 5,000 samples |
+| **Inception Score (IS)** | **2.11 ± 0.03** | **1.68 ± 0.04** | Evaluated on 5,000 samples |
+| **Peak GPU VRAM** | **1.82 GB** | **1.84 GB** | Local NVIDIA Quadro T2000 (Budget: $<2.5\text{ GB}$) |
 
-Detailed mathematical derivations, training curves, and analysis are available in the [Baseline Technical Report](docs/reports/001-baseline-vae-report.md).
+Detailed mathematical derivations, training curves, and analysis are available in:
+* [Baseline Technical Report (CIFAR-10 & MNIST)](docs/reports/001-baseline-vae-report.md)
+* [Enhanced VAE Technical Report (Heteroscedastic $\beta$-NLL)](docs/reports/002-enhanced-vae-report.md)
 
 ---
 

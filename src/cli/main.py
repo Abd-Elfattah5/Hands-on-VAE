@@ -34,9 +34,11 @@ from src.utils.seeding import seed_everything
 # Ensure all modular components are registered
 import src.models.encoders.cnn
 import src.models.decoders.cnn
+import src.models.decoders.cnn_hetero
 import src.models.posteriors.diagonal
 import src.models.priors.standard_gaussian
 import src.models.likelihoods.gaussian_homo
+import src.models.likelihoods.gaussian_hetero
 import src.models.losses.elbo
 
 app = typer.Typer(

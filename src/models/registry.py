@@ -91,9 +91,11 @@ def _ensure_default_components() -> None:
     try:
         import src.models.encoders.cnn  # noqa: F401
         import src.models.decoders.cnn  # noqa: F401
+        import src.models.decoders.cnn_hetero  # noqa: F401
         import src.models.posteriors.diagonal  # noqa: F401
         import src.models.priors.standard_gaussian  # noqa: F401
         import src.models.likelihoods.gaussian_homo  # noqa: F401
+        import src.models.likelihoods.gaussian_hetero  # noqa: F401
         import src.models.losses.elbo  # noqa: F401
     except ImportError:
         pass

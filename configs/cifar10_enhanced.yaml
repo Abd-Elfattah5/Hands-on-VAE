@@ -1,0 +1,55 @@
+experiment:
+  name: "cifar10_enhanced"
+  seed: 42
+  device: "auto"
+  output_dir: "artifacts/runs/cifar10_enhanced"
+
+data:
+  dataset: "cifar10"
+  data_dir: "data"
+  batch_size: 128
+  num_workers: 4
+  val_split: 0.1
+
+model:
+  latent_dim: 128
+  in_channels: 3
+  image_size: 32
+  encoder:
+    name: "cnn"
+    channels: [32, 64, 128]
+    num_groups: 8
+    act_func: "leaky_relu"
+    negative_slope: 0.2
+  posterior:
+    name: "diagonal"
+    clamp_min: -20.0
+    clamp_max: 2.0
+  prior:
+    name: "standard_gaussian"
+  decoder:
+    name: "cnn_hetero"
+    channels: [128, 64, 32]
+    num_groups: 8
+    act_func: "leaky_relu"
+    negative_slope: 0.2
+    final_act: "tanh"
+    clamp_min: -10.0
+    clamp_max: 5.0
+  likelihood:
+    name: "gaussian_hetero"
+    beta_nll: 0.5
+  loss:
+    name: "elbo"
+    beta: 1.0
+
+training:
+  epochs: 50
+  lr: 0.001
+  weight_decay: 1.0e-5
+  scheduler:
+    type: "cosine"
+    min_lr: 1.0e-5
+  gradient_clip_val: 5.0
+  save_every: 5
+  eval_every: 1

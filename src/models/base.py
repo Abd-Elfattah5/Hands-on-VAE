@@ -78,7 +78,10 @@ class BaseLikelihood(nn.Module, ABC):
 
     @abstractmethod
     def negative_log_likelihood(
-        self, reconstruction: torch.Tensor, target: torch.Tensor
+        self,
+        reconstruction: torch.Tensor,
+        target: torch.Tensor,
+        extra: Any = None,
     ) -> torch.Tensor:
         """Returns negative log-likelihood per batch element, shape [B]."""
         pass
