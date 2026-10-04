@@ -37,7 +37,7 @@ This repository contains a ground-up implementation of a continuous **Variationa
 | **Peak GPU VRAM** | **1.82 GB** | **1.84 GB** | Local NVIDIA Quadro T2000 (Budget: $<2.5\text{ GB}$) |
 
 Detailed mathematical derivations, training curves, and analysis are available in:
-* [Baseline Technical Report (CIFAR-10 & MNIST)](docs/reports/001-baseline-vae-report.md)
+* [Baseline Technical Report (CIFAR-10 & MNIST)](docs/reports/001-baseline-vae-report.md), including a [side-by-side CIFAR-10 vs. MNIST comparison](docs/reports/001-baseline-vae-report.md#732-same-model-two-datasets-side-by-side-evidence): the identical model reaches FID 37.32 on MNIST vs. 169.02 on CIFAR-10, showing the difficulty lies in the dataset
 * [Enhanced VAE Technical Report (Heteroscedastic $\beta$-NLL)](docs/reports/002-enhanced-vae-report.md)
 
 ### VAE vs. DDPM (GenCV003 comparison)

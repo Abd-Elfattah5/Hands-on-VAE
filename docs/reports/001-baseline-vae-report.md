@@ -174,6 +174,9 @@ All qualitative diagnostic artifacts were rendered using high-resolution $4\time
 
 ![Baseline VAE prior samples](../../artifacts/samples/sample_grid_1024.png)
 
+> The same model trained on MNIST produces legible digits (FID 37.32): see the side-by-side comparison in
+> [§7.3.2](#732-same-model-two-datasets-side-by-side-evidence), which shows the weakness comes from CIFAR-10's complexity, not from the model.
+
 **Subjective assessment (GenCV003 qualitative criteria)**:
 * **Realism**: Low. Samples read as soft colour fields with plausible global layouts (sky over ground, a dark blob on a
   lighter background), but object boundaries and textures are washed out by the $L_2$ mean-smoothing effect (§7.1);
@@ -254,23 +257,66 @@ To rigorously test whether the observed blurriness and tangled latent representa
 | **Fréchet Inception Distance (FID)** | $169.02$ | **$37.32$** | **$4.5\times$ superior distribution fidelity** |
 | **Inception Score (IS)** | $2.11 \pm 0.03$ | **$2.50 \pm 0.03$** | Cleaner probability confidence |
 
-#### 7.3.2 Critical Qualitative Observations & Insights
+#### 7.3.2 Same Model, Two Datasets: Side-by-Side Evidence
 
-1. **Resolution of Latent Tangling (t-SNE & PCA Clustering)**:
-   - **On CIFAR-10**, natural photographic backgrounds (sky, asphalt, grass, lighting variations) introduced large, unstructured pixel variance that dominated the unsupervised ELBO objective, causing class clusters to intermingle in PCA projections.
-   - **On MNIST**, where background noise is zero ($x_{\text{bg}} = -1.0$), the latent space organized into **clean, well-separated semantic clusters** (`artifacts/eval_mnist/latent_tsne.png`):
-     - Digits `0` formed an isolated perimeter cluster.
-     - Digits `1` grouped into a distinct, distant cluster.
-     - Digits `7`, `9`, and `4` clustered near each other (reflecting shared vertical strokes and top crossbars).
-     - Digits `3`, `5`, and `8` clustered together (reflecting shared rounded loops).
-   - This empirically confirms that **the variational posterior and reparameterization mechanics are functioning properly**, and that unsupervised representation tangling on CIFAR-10 is a data-domain phenomenon rather than a mathematical bug.
+The two runs use **the same architecture, latent size ($d = 32$), loss, optimizer, scheduler and seed**; the configs
+(`configs/cifar10_baseline.yaml`, `configs/mnist_baseline.yaml`) differ only in the dataset, the number of input
+channels (3 vs 1) and the epoch count (50 vs 30, so MNIST even trained for less). Any difference in output quality is
+therefore caused by the **data**, not by the model.
 
-2. **Resolution of Blurriness (Elimination of $L_2$ Background Smoothing)**:
-   - On MNIST, reconstructed digits achieved **$21.3\text{ dB}$ PSNR** (MSE: $0.0073$) with high-contrast, crisp white strokes against dark backgrounds (`artifacts/eval_mnist/reconstruction_gallery.png`).
-   - Because black background pixels have near-zero uncertainty across all samples, the conditional mean $\mathbb{E}[x|z]$ does not average competing edge hypotheses, eliminating the grey smear seen in complex CIFAR-10 textures.
+**Prior samples** ($z \sim \mathcal{N}(0, I)$, 64 samples, seed 42):
 
-3. **Smooth Generative Surface on Pure Prior Sampling**:
-   - Both pure synthetic 2D prior interpolation (`artifacts/interpolations/mnist_synthetic_grid_2d.png`) and 2D manifold meshgrid traversals (`artifacts/eval_mnist/latent_manifold_2d.png`) demonstrated seamless geometric transitions across digit morphologies without mode collapse or boundary artifacts.
+| CIFAR-10 (FID 169.02, IS 2.11) | MNIST (FID 37.32, IS 2.50) |
+| :---: | :---: |
+| ![CIFAR-10 samples](../../artifacts/samples/sample_grid_1024.png) | ![MNIST samples](../../artifacts/samples/mnist_sample_grid_1024.png) |
+
+On MNIST almost every sample is a legible digit (0–9 all appear, in varied slants and stroke widths); on CIFAR-10 the
+same decoder produces only soft colour layouts. **FID drops 4.5×** (169.02 → 37.32) with no change to the model.
+
+**Reconstructions** (left: real test image, right: reconstruction):
+
+| CIFAR-10 (PSNR 18.1 dB) | MNIST (PSNR 21.3 dB) |
+| :---: | :---: |
+| ![CIFAR-10 reconstructions](../../artifacts/eval/reconstruction_gallery.png) | ![MNIST reconstructions](../../artifacts/eval_mnist/reconstruction_gallery.png) |
+
+MNIST reconstructions are near-copies (shape, slant and stroke thickness preserved, only the edges slightly softened).
+CIFAR-10 reconstructions keep the global colour layout (a white ship on blue, an orange background) but lose every
+fine detail: the 32-number latent cannot store the texture of fur, leaves or windows, and the pixel-space $L_2$
+likelihood fills the missing detail with its average, which is blur.
+
+**Latent space** (t-SNE of posterior means, coloured by class; the MNIST plot's title is a hard-coded label from
+`src/evaluation/latent_analysis.py` and reads "CIFAR-10", but the legend shows the digits):
+
+| CIFAR-10 | MNIST |
+| :---: | :---: |
+| ![CIFAR-10 t-SNE](../../artifacts/eval/latent_tsne.png) | ![MNIST t-SNE](../../artifacts/eval_mnist/latent_tsne.png) |
+
+Without any label supervision, MNIST digits form **ten separate clusters**; neighbouring clusters share strokes
+(4/7/9 with vertical strokes and crossbars, 3/5/8 with loops). CIFAR-10 classes overlap almost completely, with only
+weak tendencies (ships and airplanes on one side, frogs and animals in the centre), because pixel variance in
+CIFAR-10 is dominated by background, lighting and colour rather than object identity.
+
+**Smooth generative surface (MNIST)**: interpolating between random prior vectors morphs one digit continuously into
+another, with every intermediate image still a plausible digit:
+
+![MNIST synthetic interpolation](../../artifacts/interpolations/mnist_synthetic_grid_2d.png)
+
+#### 7.3.3 Why the Same Model Succeeds on MNIST and Struggles on CIFAR-10
+
+| Factor | MNIST | CIFAR-10 |
+| :--- | :--- | :--- |
+| Content | One centred stroke pattern on an empty black background | Objects in cluttered natural scenes (sky, grass, roads, indoor) |
+| Variation that matters | Digit identity, slant, thickness (low intrinsic dimension: only **23 of 32** latent units are active) | Object class plus pose, colour, lighting, background and texture (all **32 of 32** units used, still not enough) |
+| Pixel uncertainty given $z$ | Near zero for the background; only stroke edges are uncertain | High almost everywhere: many sharp images are plausible for one $z$ |
+| Effect of the $L_2$ likelihood | Averaging a few nearly identical hypotheses gives a sharp digit | Averaging many different textures gives a grey-brown blur |
+| Colour | 1 channel | 3 channels with correlated colour statistics |
+
+**Conclusion of the diagnostic**: the encoder, reparameterization, KL term, decoder and training loop are correct and
+capable. MNIST shows clean clusters, legible samples and FID 37.32 from the **identical** model. The weak CIFAR-10
+results come from the dataset's much higher complexity under a single-step, pixel-space Gaussian likelihood. This is
+exactly the limitation that motivated the enhanced VAE ([report 002](002-enhanced-vae-report.md)) and the DDPM
+([Hands-on-DDPM](https://github.com/Abd-Elfattah5/Hands-on-DDPM)), which reaches FID 39.69 on CIFAR-10 with the same
+evaluation protocol.
 
 ---
 
