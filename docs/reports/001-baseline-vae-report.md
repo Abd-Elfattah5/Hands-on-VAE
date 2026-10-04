@@ -165,19 +165,38 @@ Evaluated on 10,000 CIFAR-10 test samples and 5,000 synthetic generative samples
 
 ## 6. Qualitative Visual Analysis
 
-All qualitative diagnostic artifacts were rendered using high-resolution $4\times$ Lanczos upscaling ($1024 \times 1024$ canvases) to prevent image viewer stretching artifacts.
+All qualitative diagnostic artifacts were rendered using high-resolution $4\times$ bicubic upscaling ($1024 \times 1024$ canvases) to prevent image viewer stretching artifacts.
 
 ### 6.1 Prior Sampling & Unconditional Image Synthesis
 * **Artifact**: `artifacts/samples/sample_grid_1024.png` ($8 \times 8$ grid of 64 synthetic samples).
 * **Observation**: The decoder synthesizes coherent visual color compositions, distinctive foreground silhouettes (e.g. automotive outlines, bird shapes, and animal forms), and realistic natural backgrounds (sky, grass, and road surfaces).
 * **Diversity**: No mode collapse is observed; the model generates distinct color palettes and visual topologies across all quadrants of the grid.
 
+![Baseline VAE prior samples](../../artifacts/samples/sample_grid_1024.png)
+
+**Subjective assessment (GenCV003 qualitative criteria)**:
+* **Realism**: Low. Samples read as soft colour fields with plausible global layouts (sky over ground, a dark blob on a
+  lighter background), but object boundaries and textures are washed out by the $L_2$ mean-smoothing effect (§7.1);
+  few samples are identifiable as a specific CIFAR-10 class.
+* **Diversity**: Moderate to high at the level of palette and composition (blue skies, green and brown grounds, warm
+  and cool scenes), with no repeated samples or mode collapse; diversity of object identity is limited because the
+  objects themselves are rarely resolved.
+* **Thematic consistency**: Scenes are coherent in a coarse sense: the dominant CIFAR-10 contexts (sky for
+  airplanes and ships, grass and fields for animals, roads for vehicles) appear with matching colour layouts, but the
+  foreground object rarely matches its context clearly enough to confirm a theme.
+
 ### 6.2 Pure Synthetic 2D Prior Manifold Interpolation
 * **Artifact**: `artifacts/interpolations/synthetic_grid_2d.png` ($8 \times 8$ grid).
+
+![synthetic_grid_2d.png](../../artifacts/interpolations/synthetic_grid_2d.png)
+
 * **Observation**: By sampling 4 random vectors $z_{tl}, z_{tr}, z_{bl}, z_{br} \sim \mathcal{N}(0, I)$ and performing bilinear interpolation across a 2D meshgrid $(\alpha, \beta) \in [0, 1]^2$, the decoder demonstrates continuous semantic morphing. Background colors and silhouette edges transition smoothly from one anchor to another without abrupt jumps or visual tearing.
 
 ### 6.3 1D Latent Coordinate Sweeps (Axis Traversal)
 * **Artifact**: `artifacts/eval/latent_traversal_1d.png` (8 coordinate rows $\times$ 10 steps spanning $[-3.0, +3.0]$).
+
+![latent_traversal_1d.png](../../artifacts/eval/latent_traversal_1d.png)
+
 * **Observation**: Sweeping individual latent coordinates while holding all other 31 dimensions at zero confirms disentangled feature control:
   * Coordinate $z_0$: Controls global illumination and background contrast (dark/night $\to$ bright daylight).
   * Coordinate $z_1$: Controls hue and chromatic balance (warm orange/brown $\to$ cool cyan/blue).
@@ -185,12 +204,18 @@ All qualitative diagnostic artifacts were rendered using high-resolution $4\time
 
 ### 6.4 2D Latent Space Embeddings (t-SNE & PCA)
 * **Artifacts**: `artifacts/eval/latent_tsne.png` and `artifacts/eval/latent_pca.png`.
+
+![latent_tsne.png](../../artifacts/eval/latent_tsne.png)
+
 * **Observation**:
   * **Class Grouping**: Natural semantic clusters emerge without supervision. Vehicles (automobiles, trucks, airplanes, ships) cluster predominantly on one hemisphere of the latent space, while living creatures (birds, cats, deer, dogs, frogs, horses) occupy the opposing hemisphere.
   * **Prior Coverage**: Real posterior distributions $q_\phi(z|x)$ overlap symmetrically with standard normal prior samples $\mathcal{N}(0, I)$ (visualized as neutral background scatter), confirming the latent space is dense without isolated "dead zones".
 
 ### 6.5 Reconstruction Quality vs. Ground Truth
 * **Artifact**: `artifacts/eval/reconstruction_gallery.png`.
+
+![reconstruction_gallery.png](../../artifacts/eval/reconstruction_gallery.png)
+
 * **Observation**: Side-by-side comparison of real CIFAR-10 test images and their reconstructions demonstrates faithful preservation of global structure, dominant object colors, and coarse shapes, achieving **$18.1\text{ dB}$ PSNR**.
 
 ---
@@ -251,11 +276,16 @@ To rigorously test whether the observed blurriness and tangled latent representa
 
 ## 8. Conclusion
 
-The Phase 1–8 baseline VAE implementation successfully validates the foundational mathematics of variational generative modeling across both CIFAR-10 and MNIST:
+The baseline VAE implementation (feature `001-create-vae`) successfully validates the foundational mathematics of variational generative modeling across both CIFAR-10 and MNIST:
 * From-scratch architecture rigorously compliant with constitutional principles.
 * Complete absence of posterior collapse ($A_z = 32/32$ on CIFAR-10, $23/32$ on MNIST).
 * Monotonic convergence across 50 epochs with stable KL equilibrium.
 * Robust quantitative metrics (CIFAR-10 FID: 169.02; MNIST FID: 37.32, IS: $2.50 \pm 0.03$).
 * Comparative analysis proving that CIFAR-10 blurriness is rooted in the homoscedastic $L_2$ likelihood assumption over natural image textures, whereas isolated stroke domains (MNIST) achieve high PSNR ($21.3\text{ dB}$) and clean semantic clustering.
 
-This establishes the formal empirical baseline required by `GenCV003` Deliverable (a). Future iterations (`002-enhanced-vae`) will build upon these findings by evaluating minimal likelihood and capacity enhancements (e.g., learnable noise variance $\sigma_{\text{obs}}$ or $\beta$-NLL) to mitigate CIFAR-10 blurriness before progressing to Denoising Diffusion Probabilistic Models (DDPM).
+This establishes the empirical VAE baseline for `GenCV003`. It was followed by the
+[enhanced VAE (`002`)](002-enhanced-vae-report.md), which tested a heteroscedastic β-NLL likelihood and a 128-d latent,
+and by the from-scratch DDPM in the sibling repository [Hands-on-DDPM](https://github.com/Abd-Elfattah5/Hands-on-DDPM).
+Under the same benchmark protocol the DDPM reaches **FID 39.69 / IS 5.18** versus **169.02 / 2.11** for this baseline;
+see the [DDPM report](https://github.com/Abd-Elfattah5/Hands-on-DDPM/blob/main/docs/reports/001-baseline-ddpm-report.md) and the VAE vs. DDPM comparison in
+[§6 of the enhanced report](002-enhanced-vae-report.md#6-vae-vs-ddpm-comparison).

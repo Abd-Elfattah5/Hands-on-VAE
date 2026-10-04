@@ -17,7 +17,7 @@ This repository contains a ground-up implementation of a continuous **Variationa
 * **Extensible Component Registries**: Pluggable factory architecture covering Encoders, Posteriors, Priors, Decoders, Likelihoods, and Losses (`@register_encoder`, etc.).
 * **Deterministic Reproducibility**: Unified global seeding across Python, NumPy, and PyTorch (CPU/CUDA) with complete checkpoint provenance metadata.
 * **Standardized Benchmarking Pipeline**: Quantitative evaluation computing test ELBO, reconstruction MSE, active latent units ($A_z = 32/32$), **Fréchet Inception Distance (FID)**, and **Inception Score (IS)**.
-* **Rich Qualitative Diagnostics**: High-resolution canvas upscaling (Lanczos $4\times$, $1024 \times 1024$ grids), pure synthetic prior interpolation, 1D latent coordinate sweeps, 2D generative manifold surface traversals, and t-SNE / PCA latent space projections.
+* **Rich Qualitative Diagnostics**: High-resolution canvas upscaling (bicubic $4\times$, $1024 \times 1024$ grids), pure synthetic prior interpolation, 1D latent coordinate sweeps, 2D generative manifold surface traversals, and t-SNE / PCA latent space projections.
 
 ---
 
@@ -30,7 +30,7 @@ This repository contains a ground-up implementation of a continuous **Variationa
 | **Model Parameters** | **1.60 M** | **2.25 M** | $+0.65\text{M}$ parameters |
 | **Reconstruction MSE (Test)** | **0.0578** | **0.0563** | Test partition pixel error (Improved) |
 | **Gallery Test PSNR** | **18.1 dB** (MSE: 0.0156) | **18.3 dB** (MSE: 0.0147) | Evaluated on real test images (Improved) |
-| **KL Divergence** | **33.82 nats** | **92.32 nats** | $\approx 0.72$ nats / dimension |
+| **KL Divergence** | **33.82 nats** | **92.32 nats** | $\approx 1.06$ / $0.72$ nats per dimension |
 | **Active Latent Units ($A_z$)** | **32 / 32** | **128 / 128** | $100\%$ capacity utilization ($\text{Var}(\mu_j) > 0.01$) |
 | **Fréchet Inception Distance (FID)** | **169.02** | **181.00** | Evaluated on 5,000 samples |
 | **Inception Score (IS)** | **2.11 ± 0.03** | **1.68 ± 0.04** | Evaluated on 5,000 samples |
@@ -40,19 +40,36 @@ Detailed mathematical derivations, training curves, and analysis are available i
 * [Baseline Technical Report (CIFAR-10 & MNIST)](docs/reports/001-baseline-vae-report.md)
 * [Enhanced VAE Technical Report (Heteroscedastic $\beta$-NLL)](docs/reports/002-enhanced-vae-report.md)
 
+### VAE vs. DDPM (GenCV003 comparison)
+
+The DDPM half of the assignment is in the sibling repository [Hands-on-DDPM](https://github.com/Abd-Elfattah5/Hands-on-DDPM). Both repositories use the **same benchmark protocol** (5,000 generated vs. the first 5,000 CIFAR-10 test images, torchvision Inception-v3, IS over 10 splits), so the numbers are directly comparable:
+
+| Model | FID ↓ | IS ↑ | Parameters | Network passes / image | Sampling time |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| VAE baseline (this repo, `001`) | 169.02 | 2.11 ± 0.03 | 1.60 M | 1 | milliseconds |
+| VAE enhanced (this repo, `002`) | 181.00 | 1.68 ± 0.04 | 2.25 M | 1 | milliseconds |
+| **DDPM** ([Hands-on-DDPM](https://github.com/Abd-Elfattah5/Hands-on-DDPM)) | **39.69** | **5.18 ± 0.14** | 16.06 M | 1,000 | 2.16 s (Quadro T2000) |
+
+Main difference: the VAE decodes a compact latent in **one pass** and is trained with a pixel-space likelihood, which averages plausible images into blur; the DDPM has no encoder and generates by **iteratively denoising** over 1,000 steps, trained to predict noise, which gives much sharper and more diverse samples at a far higher sampling cost. Full analysis: [DDPM report, §7 VAE vs. DDPM](https://github.com/Abd-Elfattah5/Hands-on-DDPM/blob/main/docs/reports/001-baseline-ddpm-report.md#7-vae-vs-ddpm-main-difference-and-trade-offs) and [enhanced VAE report, §6](docs/reports/002-enhanced-vae-report.md#6-vae-vs-ddpm-comparison).
+
 ---
 
 ## Project Structure
 
 ```text
+├── artifacts/                       # Tracked metrics, figures and logs (eval/, eval_enhanced/, eval_mnist/, samples/, interpolations/, runs/); no weights
 ├── configs/
-│   └── cifar10_baseline.yaml       # Declarative experiment configuration
+│   ├── cifar10_baseline.yaml       # Baseline experiment configuration
+│   ├── cifar10_enhanced.yaml       # Enhanced (heteroscedastic β-NLL, d = 128)
+│   └── mnist_baseline.yaml         # MNIST diagnostic baseline
 ├── docs/
 │   ├── adr/                         # Architecture Decision Records
 │   └── reports/
-│       └── 001-baseline-vae-report.md # Formal VAE Technical Report
+│       ├── 001-baseline-vae-report.md # Baseline VAE technical report
+│       └── 002-enhanced-vae-report.md # Enhanced VAE report + VAE vs. DDPM comparison
 ├── specs/                           # Feature specs, task lists, and contracts
-│   └── 001-create-vae/
+│   ├── 001-create-vae/
+│   └── 002-enhanced-vae/
 ├── src/
 │   ├── cli/                         # Unified Typer CLI entrypoint
 │   ├── configs/                     # Typed YAML schema and dimensional validator
@@ -62,7 +79,7 @@ Detailed mathematical derivations, training curves, and analysis are available i
 │   ├── training/                    # Trainer loop, scheduler, and checkpoint manager
 │   └── utils/                       # Global seeding and structured logging
 └── tests/
-    └── unit/                        # 33 unit tests (100% passing)
+    └── unit/                        # 38 unit tests (100% passing)
 ```
 
 ---
@@ -102,7 +119,7 @@ The `vae` command-line interface provides complete operational workflows:
 ```bash
 vae train --config configs/cifar10_baseline.yaml --epochs 50 --batch-size 128
 ```
-*Emits `best_checkpoint.pt`, `final_checkpoint.pt`, `metrics.json`, and `loss_curve.png` to `artifacts/runs/cifar10_baseline/`.*
+*Emits `latest.pt`, `best_checkpoint.pt`/`best.pt`, `epoch_XXX.pt`, `final_checkpoint.pt`, `metrics.json`, `train.log` and `loss_curve.png` to `artifacts/runs/cifar10_baseline/`. Weights are not tracked in git; metrics, logs and figures under `artifacts/` are.*
 
 ### 2. Evaluate Held-Out Test Split
 
@@ -152,15 +169,35 @@ vae interpolate \
   --upscale 4
 ```
 
-### 7. Run Test Suite
+### 7. Enhanced VAE (Heteroscedastic β-NLL, d = 128)
+
+```bash
+vae train --config configs/cifar10_enhanced.yaml --epochs 50 --batch-size 128
+vae benchmark --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --num-samples 5000 --out artifacts/eval_enhanced/benchmark_metrics.json
+vae plot-latent --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --num-samples 2500 --out-dir artifacts/eval_enhanced
+vae generate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --num-samples 64 --out artifacts/samples/enhanced_sample_grid_1024.png --upscale 4 --seed 42
+vae interpolate --checkpoint artifacts/runs/cifar10_enhanced/best_checkpoint.pt --synthetic --steps 8 --out artifacts/interpolations/enhanced_synthetic_grid_2d.png --upscale 4
+```
+
+### 8. MNIST Diagnostic Baseline
+
+```bash
+vae train --config configs/mnist_baseline.yaml
+vae benchmark --checkpoint artifacts/runs/mnist_baseline/best_checkpoint.pt --num-samples 5000 --out artifacts/eval_mnist/benchmark_metrics.json
+vae plot-latent --checkpoint artifacts/runs/mnist_baseline/best_checkpoint.pt --num-samples 2500 --out-dir artifacts/eval_mnist
+vae generate --checkpoint artifacts/runs/mnist_baseline/best_checkpoint.pt --num-samples 64 --out artifacts/samples/mnist_sample_grid_1024.png --upscale 4 --seed 42
+vae interpolate --checkpoint artifacts/runs/mnist_baseline/best_checkpoint.pt --synthetic --steps 8 --out artifacts/interpolations/mnist_synthetic_grid_2d.png --upscale 4
+```
+
+### 9. Run Test Suite
 
 ```bash
 pytest tests/ -v
 ```
-*Executes all 33 unit tests verifying shape preservation, gradient propagation through reparameterization, analytical KL formulas, FID, and Inception Score calculations.*
+*Executes all 38 unit tests verifying shape preservation, gradient propagation through reparameterization, analytical KL formulas, FID, and Inception Score calculations.*
 
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License (see [`LICENSE`](LICENSE)).

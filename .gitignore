@@ -31,9 +31,9 @@ wheels/
 
 # Data & Model Artifacts
 /data/
-artifacts/
+# Artifacts: metrics, figures, logs are tracked so reports render on GitHub; weights (*.pt) are not.
 checkpoints/
-runs/
+/runs/
 *.pt
 *.pth
 *.onnx

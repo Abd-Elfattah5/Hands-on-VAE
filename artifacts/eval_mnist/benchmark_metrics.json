@@ -1,0 +1,14 @@
+{
+  "test_loss": 38.0217998046875,
+  "test_recon": 18.438737982177734,
+  "test_kl": 19.583061895751953,
+  "test_mse": 0.03601315947771072,
+  "active_units": 23,
+  "total_samples": 10000,
+  "fid": 37.32,
+  "inception_score_mean": 2.5,
+  "inception_score_std": 0.03,
+  "benchmark_samples": 5000,
+  "checkpoint": "artifacts/runs/mnist_baseline/best_checkpoint.pt",
+  "latent_dim": 32
+}

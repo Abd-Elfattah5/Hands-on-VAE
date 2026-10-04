@@ -1,0 +1,14 @@
+{
+  "test_loss": -580.2949979492188,
+  "test_recon": -672.6148146484375,
+  "test_kl": 92.31981794433594,
+  "test_mse": 0.056303404021263125,
+  "active_units": 128,
+  "total_samples": 10000,
+  "fid": 181.0,
+  "inception_score_mean": 1.68,
+  "inception_score_std": 0.04,
+  "benchmark_samples": 5000,
+  "checkpoint": "artifacts/runs/cifar10_enhanced/best_checkpoint.pt",
+  "latent_dim": 128
+}

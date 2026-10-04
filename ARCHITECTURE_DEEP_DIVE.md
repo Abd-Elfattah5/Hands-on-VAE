@@ -243,8 +243,15 @@ These theoretical and empirical findings provide the foundational motivation for
 │   latent bottleneck z          │   x_T → x_{T-1} → ... → x_0                           │
 │ • Loss placed on image pixels  │ • Loss placed on predicted NOISE vector ε_θ(x_t, t),  │
 │   (causes L2 mean blurriness)  │   preserving high-frequency gradients                 │
-│ • Fast, but blurry             │ • Slower sampling, but photorealistic and crisp       │
+│ • Fast, but blurry             │ • Slower sampling, but much sharper and more diverse  │
 └────────────────────────────────┴───────────────────────────────────────────────────────┘
 ```
+
+**Outcome**: the DDPM was implemented from scratch in the sibling repository
+[Hands-on-DDPM](https://github.com/Abd-Elfattah5/Hands-on-DDPM). Under the same benchmark protocol it reaches
+**FID 39.69 / IS 5.18** versus 169.02 / 2.11 (baseline VAE) and 181.00 / 1.68 (enhanced VAE), confirming the paradigm
+shift above; fine texture at 32×32 is still imperfect after 80 epochs. See the
+[DDPM report](https://github.com/Abd-Elfattah5/Hands-on-DDPM/blob/main/docs/reports/001-baseline-ddpm-report.md) and
+the comparison in [`docs/reports/002-enhanced-vae-report.md` §6](docs/reports/002-enhanced-vae-report.md#6-vae-vs-ddpm-comparison).
 
 This completes the exhaustive architectural documentation across all experimental milestones.
